@@ -10,7 +10,7 @@ interface = input("Enter the interface you would like to sniff on : ")
 fil = input(">> Filter (tcp and port 60) : ")
 count = int(input(">> Packet count to capture (default 3): "))
 
-
+z = 1
 # Sniff Beacon frames on the "en0" interface in monitor mode
 a = sniff(iface=interface, prn=lambda x: x.summary(), filter=fil, count=count)
 print(a)
