@@ -2,7 +2,6 @@ from scapy.all import sniff
 import psutil   # for the network interfaces
 from scapy.layers.inet import IP, TCP, UDP, Ether  # to check for protocols
 import time     # for the date / time stamp
-
 # Find and print network interfaces
 addrs = psutil.net_if_addrs()
 interface_names = list(addrs.keys())
@@ -17,9 +16,11 @@ count = int(input(">> Packet count to capture (default 3): "))
 # List to store captured packets
 captured_packets = []
 
-
 # The callback function for the captured packets
 def packet_callback(packet):
+    # Add the packet to the list
+    captured_packets.append(packet)
+
     timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
 
     # Extract source and destination addresses
@@ -48,20 +49,14 @@ def packet_callback(packet):
     # Print detailed information about the packet
     print(f"{timestamp} || {src_ip} -> {dst_ip} || protocol: {protocol} || port: {port}")
 
-
 # Sniff packets on the specified interface in monitor mode
-a = sniff(prn=packet_callback, iface=interface, filter=fil, count=count)
-
-# Display detailed information about the captured packets
-print("--------")
-for i, packet in enumerate(captured_packets):
-    print(f"{i}: {packet.summary()}")
+sniff(prn=packet_callback, iface=interface, filter=fil, count=count)
 
 # Prompt the user to choose a packet for detailed information
-selected_index = int(input("Enter the index of the packet to show details: "))
-if 0 <= selected_index < len(captured_packets):
+try:
+    selected_index = int(input("Enter the index of the packet to show details: "))
     selected_packet = captured_packets[selected_index]
     print("Selected Packet Details:")
     selected_packet.show()
-else:
+except (ValueError, IndexError):
     print("Invalid index.")
