@@ -2,19 +2,23 @@ from scapy.all import sniff
 import psutil   # for the network interfaces
 from scapy.layers.inet import IP, TCP, UDP, Ether  # to check for protocols
 import time     # for the date / time stamp
+
+
 # Find and print network interfaces
 addrs = psutil.net_if_addrs()
 interface_names = list(addrs.keys())
 print("Network Interfaces:")
 print(interface_names)
 
-# A little questionnaire for SNIFF parameters
-interface = input("Enter the interface you would like to sniff on: ")
-fil = input(">> Filter (tcp and port 60): ")
-count = int(input(">> Packet count to capture (default 3): "))
 
+# A little questionnaire for SNIFF parameters with default values
+interface = input("Enter the interface you would like to sniff on: ") or "en0"
+fil = input(">> Filter (tcp and port 60): ")
+count_input = input(">> Packet count to capture (default 3): ")
+count = int(count_input) if count_input.strip() else 3
 # List to store captured packets
 captured_packets = []
+
 
 # The callback function for the captured packets
 def packet_callback(packet):
@@ -49,14 +53,16 @@ def packet_callback(packet):
     # Print detailed information about the packet
     print(f"{timestamp} || {src_ip} -> {dst_ip} || protocol: {protocol} || port: {port}")
 
+
 # Sniff packets on the specified interface in monitor mode
 sniff(prn=packet_callback, iface=interface, filter=fil, count=count)
 
 # Prompt the user to choose a packet for detailed information
-try:
-    selected_index = int(input("Enter the index of the packet to show details: "))
-    selected_packet = captured_packets[selected_index]
-    print("Selected Packet Details:")
-    selected_packet.show()
-except (ValueError, IndexError):
-    print("Invalid index.")
+while 1:
+    try:
+        selected_index = int(input("Enter the index of the packet to show details: "))
+        selected_packet = captured_packets[selected_index]
+        print("Selected Packet Details:")
+        selected_packet.show()
+    except (ValueError, IndexError):
+        print("Invalid index.")
