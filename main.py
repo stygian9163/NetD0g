@@ -67,16 +67,20 @@ while True:
         try:
             selected_index = int(input("Enter the index of the packet to show details: "))
             selected_packet = captured_packets[selected_index]
+            print("---------------------\n" + selected_packet.summary())
             print("Selected Packet Details:")
             selected_packet.show()
+            print("----------------------")
         except (ValueError, IndexError):
             print("Invalid index.")
     elif choice.lower() == "b":
         try:
             selected_index = int(input("Enter the index of the packet to show details: "))
             selected_packet = captured_packets[selected_index]
+            print("----------------------\n" + selected_packet.summary())
             print("Selected Packet Hex Dump:")
             scapy.utils.hexdump(selected_packet)
+            print("----------------------")
         except (ValueError, IndexError):
             print("Invalid index.")
     elif choice.lower() == "c":
