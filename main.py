@@ -1,3 +1,4 @@
+import scapy.utils
 from scapy.all import sniff
 import psutil   # for the network interfaces
 from scapy.layers.inet import IP, TCP, UDP, Ether  # to check for protocols
@@ -12,7 +13,7 @@ print(interface_names)
 
 
 # A little questionnaire for SNIFF parameters with default values
-interface = input("Enter the interface you would like to sniff on: ") or "en0"
+interface = input(">> Enter the interface you would like to sniff on: ") or "en0"
 fil = input(">> Filter (tcp and port 60): ")
 count_input = input(">> Packet count to capture (default 3): ")
 count = int(count_input) if count_input.strip() else 3
@@ -55,14 +56,39 @@ def packet_callback(packet):
 
 
 # Sniff packets on the specified interface in monitor mode
-sniff(prn=packet_callback, iface=interface, filter=fil, count=count)
+pkts = sniff(prn=packet_callback, iface=interface, filter=fil, count=count)
 
 # Prompt the user to choose a packet for detailed information
-while 1:
-    try:
-        selected_index = int(input("Enter the index of the packet to show details: "))
-        selected_packet = captured_packets[selected_index]
-        print("Selected Packet Details:")
-        selected_packet.show()
-    except (ValueError, IndexError):
-        print("Invalid index.")
+while True:
+    choice = input("Choose from the menu:\nA >> Detailed info\nB >> Hex dump"
+                   "\nC >> Save to pcap\nD >> Read pcap\nE >> Exit \n <<")
+
+    if choice.lower() == "a":
+        try:
+            selected_index = int(input("Enter the index of the packet to show details: "))
+            selected_packet = captured_packets[selected_index]
+            print("Selected Packet Details:")
+            selected_packet.show()
+        except (ValueError, IndexError):
+            print("Invalid index.")
+    elif choice.lower() == "b":
+        try:
+            selected_index = int(input("Enter the index of the packet to show details: "))
+            selected_packet = captured_packets[selected_index]
+            print("Selected Packet Hex Dump:")
+            scapy.utils.hexdump(selected_packet)
+        except (ValueError, IndexError):
+            print("Invalid index.")
+    elif choice.lower() == "c":
+        name = input("Write name for saved file: ")
+        name = name + ".cap"
+        scapy.utils.wrpcap(name, captured_packets)
+    elif choice.lower() == "d":
+        name = input("Write name for saved file: ")
+        name = name + ".cap"
+        scapy.utils.rdpcap(name, captured_packets)
+    elif choice.lower() == "e":
+        exit(0)
+    else:
+        print("Invalid choice. Please enter a valid option.")
+
